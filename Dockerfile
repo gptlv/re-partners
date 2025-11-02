@@ -17,6 +17,7 @@ WORKDIR /app
 
 COPY --from=build /app/bin/server /app/server
 COPY web/templates /app/web/templates
+COPY web/assets /app/web/assets
 
 EXPOSE 8080
 

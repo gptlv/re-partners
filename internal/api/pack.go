@@ -59,7 +59,7 @@ func (h *Handler) CalculateHTML(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, calculate.ErrCannotFulfill) {
 			w.WriteHeader(http.StatusUnprocessableEntity)
-			_, _ = w.Write([]byte(`<div>Cannot fulfill the order with current packs.</div>`))
+			_, _ = w.Write([]byte(`<div class="alert" role="alert">Cannot fulfill the order with current packs.</div>`))
 			return
 		}
 		h.respondError(w, http.StatusInternalServerError, "calculation failed")
