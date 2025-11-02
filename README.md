@@ -1,42 +1,91 @@
-# Software Engineering Challenge
+# Pack Calculator
 
-Imagine for a moment that one of our product lines ships in various pack sizes:
+Pack Calculator is a small Go web application that determines how many bulk packs to ship for any order quantity. The application:
 
-- 250 Items
-- 500 Items
-- 1000 Items
-- 2000 Items
-- 5000 Items
-
-Our customers can order any number of these items through our website, but they will always only be given complete packs.
-
-1. Only whole packs can be sent. Packs cannot be broken open.
-2. Within the constraints of Rule 1 above, send out the least amount of items to fulfil the order.
-3. Within the constraints of Rules 1 & 2 above, send out as few packs as possible to fulfil each order.
-
-(Please note, rule #2 takes precedence over rule #3)
-
-So, for example:
-
-| Items ordered | Correct number of packs         | Incorrect number of packs                                                   |
-| ------------- | ------------------------------- | --------------------------------------------------------------------------- |
-| 1             | 1 x 250                         | 1 x 500 – more items than necessary                                         |
-| 250           | 1 x 250                         | 1 x 500 – more items than necessary                                         |
-| 251           | 1 x 500                         | 2 x 250 – more packs than necessary                                         |
-| 501           | 1 x 500<br>1 x 250              | 1 x 1000 – more items than necessary<br>3 x 250 – more packs than necessary |
-| 12001         | 2 x 5000<br>1 x 2000<br>1 x 250 | 3 x 5000 – more items than necessary                                        |
+- Guarantees we never break packs.
+- Minimises overshoot (extra items sent) and, for equal overshoot, minimises the pack count.
+- Stores pack sizes in SQLite so they can be changed without recompiling.
+- Exposes both a JSON API and an HTMX-powered HTML UI.
 
 ---
 
-Write an application that can calculate the number of packs we need to ship to the customer.
+## Project Layout
 
-The API must be written in Golang & be usable by a HTTP API (by whichever method you choose) and show any relevant unit tests.
+```
+.
+├── cmd/server          # Application entrypoint
+├── internal
+│   ├── api             # HTTP handlers, view models
+│   ├── app             # Domain service layer
+│   ├── db              # SQLite opener + migration
+│   ├── repository      # Data access (pack sizes)
+│   ├── router          # HTTP mux wiring
+│   └── view            # Template renderer abstraction
+├── pkg/calculate       # Pure packing algorithm + tests
+├── web/templates       # HTMX-friendly templates
+├── Taskfile.yml        # Automation helpers
+└── Dockerfile          # Multi-stage container build
+```
 
-**Important:**
+---
 
-- Keep your application flexible so that pack sizes can be changed and added and removed without having to change the code.
-- Create a UI to interact with your API
+## Requirements
 
-Please also send us your code via a publicly accessible git repository, GitHub or similar is fine, and deploy your application to an online environment so that we can access it and test your application out.
+- Go 1.25.3
+- [Task](https://taskfile.dev/)
+- Docker
 
-We look forward to receiving your application!
+---
+
+## Getting Started
+
+```bash
+# One-shot setup (go mod tidy + download)
+task tidy
+
+# Run unit tests
+task test
+
+# Start the development server on :8080
+task run
+```
+
+Open <http://localhost:8080> to use the HTMX UI. Enter an amount and the page will show the minimal pack combination, the requested amount, and the configured pack sizes.
+
+---
+
+## API Endpoints
+
+| Method | Path         | Description                                      |
+| ------ | ------------ | ------------------------------------------------ |
+| GET    | `/`          | HTMX UI. Lists available pack sizes and form.    |
+| POST   | `/ui/calc`   | HTMX form target. Returns HTML fragment.         |
+| GET    | `/api/packs` | JSON array of pack sizes.                        |
+| POST   | `/api/calc`  | JSON request `{ "amount": <int> }` → combination |
+
+HTMX responses return `422 Unprocessable Entity` with a human-readable message if the order cannot be fulfilled with the current packs. JSON responses mirror that behaviour with the same status code and message.
+
+---
+
+## Running in Docker
+
+```bash
+task docker:run
+# or manually
+docker build -t pack-calculator .
+docker run --rm -p 8080:8080 pack-calculator
+```
+
+The container image runs migrations on startup and listens on port `8080`.
+
+## Taskfile Commands
+
+| Command             | Description                       |
+| ------------------- | --------------------------------- |
+| `task run`          | Run the dev server                |
+| `task test`         | Run `go test ./...`               |
+| `task build`        | Build binary to `bin/server`      |
+| `task fmt`          | Run `gofmt` across all packages   |
+| `task tidy`         | `go mod tidy` + `go mod download` |
+| `task docker:build` | Build the Docker image            |
+| `task docker:run`   | Build + run the Docker container  |
