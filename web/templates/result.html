@@ -1,0 +1,19 @@
+{{ define "result" }}
+<table>
+  <thead>
+    <tr>
+      <th>Pack size</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .Packs }}
+    <tr>
+      <td>{{ .Size }}</td>
+      <td>{{ .Count }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+<p>Requested amount: {{ .Amount }}</p>
+{{ end }}

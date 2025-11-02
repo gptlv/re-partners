@@ -1,0 +1,28 @@
+{{ define "content" }}
+<h1>Pack calculator</h1>
+
+<section>
+  <h2>Available pack sizes</h2>
+  {{ if .Sizes }}
+  <ul>
+    {{ range .Sizes }}
+    <li>{{ . }}</li>
+    {{ end }}
+  </ul>
+  {{ else }}
+  <p>No packs configured.</p>
+  {{ end }}
+</section>
+
+<form hx-post="/ui/calc" hx-target="#result" hx-swap="innerHTML">
+  <label for="amount">Amount</label>
+  <input id="amount" name="amount" type="number" min="1" required>
+  <button type="submit">Calculate</button>
+</form>
+
+<div id="result"></div>
+{{ end }}
+
+{{ define "index" }}
+{{ template "layout" . }}
+{{ end }}
