@@ -16,15 +16,6 @@ type CalculateJSONResponse struct {
 	Packs  []Pack `json:"packs"`
 }
 
-type CalculateHTMLResponse struct {
-	Amount int64
-	Packs  []Pack
-}
-
-type IndexViewModel struct {
-	Sizes []int64
-}
-
 func toAPIPacks(packs []app.Pack) []Pack {
 	result := make([]Pack, 0, len(packs))
 	for _, p := range packs {

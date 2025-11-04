@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/gptlv/re-partners/packs/internal/db"
 	"github.com/gptlv/re-partners/packs/internal/repository"
 	"github.com/gptlv/re-partners/packs/internal/router"
-	"github.com/gptlv/re-partners/packs/internal/view"
 )
 
 func main() {
@@ -24,12 +22,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tmpl := template.Must(template.ParseGlob("web/templates/*.html"))
-
 	repo := repository.NewPackRepository(database)
 	service := app.NewService(repo)
-	renderer := view.NewTemplateRenderer(tmpl)
-	handler := api.NewHandler(service, renderer)
+	handler := api.NewHandler(service)
 	mux := router.New(handler)
 
 	log.Println("listening on :8080")
