@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pack Calculator</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-content">
+      <div>
+        <h1>Pack Calculator</h1>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="flash" id="app-flash" role="status" aria-live="polite" hidden></div>
+
+    <section class="card" aria-labelledby="order-calculator-title">
+      <div class="card-header">
+        <h2 id="order-calculator-title">Order Calculator</h2>
+        <p>Enter an order amount to find the most efficient pack allocation.</p>
+      </div>
+      <form id="calculate-form" class="form-grid">
+        <label class="field">
+          <span class="field-label">Order amount</span>
+          <input
+            id="order-amount"
+            name="amount"
+            type="number"
+            min="1"
+            placeholder="e.g. 1200"
+            required
+          >
+        </label>
+        <button type="submit" class="btn primary" id="calculate-button">Calculate</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="results-title">
+      <div class="card-header">
+        <h2 id="results-title">Suggested Packs</h2>
+        <p>Results from the most recent calculation.</p>
+      </div>
+      <div id="results-empty" class="empty-state">Run a calculation to see the suggested packs.</div>
+      <div id="results-container" class="table-wrapper" hidden>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Pack size</th>
+              <th scope="col">Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="results-table-body"></tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">Requested amount</th>
+              <td id="results-requested"></td>
+            </tr>
+            <tr>
+              <th scope="row">Packed total</th>
+              <td id="results-packed"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="pack-management-title">
+      <div class="card-header">
+        <h2 id="pack-management-title">Manage Pack Sizes</h2>
+        <p>Add or remove pack sizes. Each size must be a positive integer.</p>
+      </div>
+
+      <div id="packs-container" class="packs-list">
+        <div id="packs-empty" class="empty-state">No pack sizes yet.</div>
+        <ul id="packs-list" class="list" hidden></ul>
+      </div>
+
+      <form id="add-pack-form" class="form-inline">
+        <label class="field">
+          <span class="field-label">New pack size</span>
+          <input
+            id="new-pack-size"
+            name="size"
+            type="number"
+            min="1"
+            placeholder="e.g. 750"
+            required
+          >
+        </label>
+        <button type="submit" class="btn">Add size</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>
