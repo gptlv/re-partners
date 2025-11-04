@@ -124,7 +124,7 @@ func (h *Handler) CalculateJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req CalculateJSONRequest
+	var req CalculateRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -147,7 +147,7 @@ func (h *Handler) CalculateJSON(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := CalculateJSONResponse{
+	resp := CalculateResponse{
 		Amount: req.Amount,
 		Packs:  toAPIPacks(packs),
 	}

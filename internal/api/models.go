@@ -16,11 +16,11 @@ type PackSizesResponse struct {
 	Packs []PackSizeResponse `json:"packs"`
 }
 
-type CalculateJSONRequest struct {
+type CalculateRequest struct {
 	Amount int64 `json:"amount"`
 }
 
-type CalculateJSONResponse struct {
+type CalculateResponse struct {
 	Amount int64  `json:"amount"`
 	Packs  []Pack `json:"packs"`
 }
