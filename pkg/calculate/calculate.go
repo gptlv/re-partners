@@ -17,48 +17,84 @@ func CalculatePackages(orderedItems int64, packSizes []int64) (map[int64]int64, 
 	}
 
 	largestPackSize := slices.Max(packSizes)
-	for targetAmount := orderedItems; targetAmount < orderedItems+largestPackSize; targetAmount++ {
-		solution := findOptimalCombination(targetAmount, packSizes)
-		if solution != nil {
-			return solution, nil
-		}
+	solution := findOptimalCombination(orderedItems, largestPackSize, packSizes)
+	if solution != nil {
+		return solution, nil
 	}
 
 	return nil, ErrCannotFulfill
 }
 
-func findOptimalCombination(targetAmount int64, packSizes []int64) map[int64]int64 {
-	minPacksNeeded := make([]int64, targetAmount+1)
+type state struct {
+	amount    int64
+	packCount int64
+}
 
-	lastPackUsed := make([]int64, targetAmount+1)
+func findOptimalCombination(orderedItems int64, largestPackSize int64, packSizes []int64) map[int64]int64 {
+	maxAmount := orderedItems + largestPackSize
 
-	for amount := 1; int64(amount) <= targetAmount; amount++ {
-		minPacksNeeded[amount] = targetAmount + 1
-		lastPackUsed[amount] = -1
+	type parentInfo struct {
+		previousAmount int64
+		packUsed       int64
 	}
+	parent := make(map[int64]parentInfo)
+	packCount := make(map[int64]int64)
 
-	for currentAmount := 1; int64(currentAmount) <= targetAmount; currentAmount++ {
+	queue := []state{{amount: 0, packCount: 0}}
+	packCount[0] = 0
+
+	var bestAmount int64 = -1
+	var bestPackCount int64 = maxAmount
+
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
 		for _, packSize := range packSizes {
-			remainingAmount := int64(currentAmount) - packSize
-			if remainingAmount >= 0 && minPacksNeeded[remainingAmount]+1 < minPacksNeeded[currentAmount] {
-				minPacksNeeded[currentAmount] = minPacksNeeded[remainingAmount] + 1
-				lastPackUsed[currentAmount] = packSize
+			nextAmount := current.amount + packSize
+			nextPackCount := current.packCount + 1
+
+			if nextAmount > maxAmount {
+				continue
+			}
+
+			if prevCount, exists := packCount[nextAmount]; exists && prevCount <= nextPackCount {
+				continue
+			}
+
+			packCount[nextAmount] = nextPackCount
+			parent[nextAmount] = parentInfo{
+				previousAmount: current.amount,
+				packUsed:       packSize,
+			}
+
+			if nextAmount >= orderedItems {
+				overshoot := nextAmount - orderedItems
+
+				if bestAmount == -1 ||
+					overshoot < (bestAmount-orderedItems) ||
+					(overshoot == (bestAmount-orderedItems) && nextPackCount < bestPackCount) {
+					bestAmount = nextAmount
+					bestPackCount = nextPackCount
+				}
+			} else {
+				queue = append(queue, state{amount: nextAmount, packCount: nextPackCount})
 			}
 		}
 	}
 
-	if minPacksNeeded[targetAmount] > targetAmount {
+	if bestAmount == -1 {
 		return nil
 	}
 
-	packCounts := make(map[int64]int64)
-	remainingAmount := targetAmount
+	result := make(map[int64]int64)
+	currentAmount := bestAmount
 
-	for remainingAmount > 0 {
-		packSize := lastPackUsed[remainingAmount]
-		packCounts[packSize]++
-		remainingAmount -= packSize
+	for currentAmount > 0 {
+		info := parent[currentAmount]
+		result[info.packUsed]++
+		currentAmount = info.previousAmount
 	}
 
-	return packCounts
+	return result
 }
