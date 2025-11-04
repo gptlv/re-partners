@@ -6,6 +6,7 @@ Pack Calculator is a small Go web application that determines how many bulk pack
 - Minimises overshoot (extra items sent) and, for equal overshoot, minimises the pack count.
 - Stores pack sizes in PostgreSQL
 - Exposes a RESTful JSON API
+- Provides a lightweight browser UI for running calculations and curating pack sizes
 
 ---
 
@@ -24,6 +25,7 @@ Pack Calculator is a small Go web application that determines how many bulk pack
 │   └── db              # PostgreSQL connection + migrations
 ├── migrations          # SQL migration files
 ├── deploy              # Docker Compose configuration
+├── web                 # Vanilla HTML/CSS/JS frontend
 ├── Taskfile.yml        # Automation helpers
 └── Dockerfile          # Multi-stage container build
 ```
@@ -42,6 +44,7 @@ The application follows a clean architecture pattern:
 - **pkg/calculate**: Pure algorithm for pack calculation (no external dependencies).
 - **pkg/db**: Database connection and migration utilities.
 - **migrations**: SQL migration files embedded and applied with goose.
+- **web**: Static assets (HTML, CSS, JS) that consume the JSON API.
 
 ---
 
@@ -80,7 +83,8 @@ cp .env.example .env
 docker compose --env-file .env -f deploy/docker-compose.yml up
 ```
 
-The API will be available at `http://localhost:8080`.
+- The API will be available at `http://localhost:8080`
+- The browser UI is served at `http://localhost:8080/`
 
 ### Testing the API
 
