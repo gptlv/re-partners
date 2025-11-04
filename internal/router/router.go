@@ -12,5 +12,7 @@ func New(handler *api.Handler) *http.ServeMux {
 
 	mux.HandleFunc("/api/packs", handler.GetPacks)
 	mux.HandleFunc("/api/calc", handler.CalculateJSON)
+	mux.HandleFunc("/api/sizes", handler.CreateSize)
+	mux.HandleFunc("/api/sizes/", handler.DeleteSize)
 	return mux
 }
