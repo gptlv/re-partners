@@ -1,10 +1,21 @@
 version: "3"
 
+dotenv: [".env"]
+
 tasks:
   run:
     desc: Run dev server
     cmds:
       - go run ./cmd/server
+
+  dev:
+    desc: Start database and run server
+    deps:
+      - db:up
+    cmds:
+      - cmd: sleep 2
+        silent: true
+      - task: run
 
   test:
     desc: Run unit tests
@@ -27,14 +38,33 @@ tasks:
       - go mod tidy
       - go mod download
 
+  db:up:
+    desc: Start PostgreSQL via Docker Compose
+    cmds:
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml up -d postgres
+
+  db:down:
+    desc: Stop PostgreSQL
+    cmds:
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml down
+
+  db:reset:
+    desc: Reset database (down, remove volumes, up)
+    cmds:
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml down -v
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml up -d postgres
+
   docker:build:
     desc: Build docker image
     cmds:
       - docker build -t pack-calculator .
 
   docker:run:
-    desc: Run docker container
-    deps:
-      - docker:build
+    desc: Run full stack via Docker Compose
     cmds:
-      - docker run --rm -p 8080:8080 pack-calculator
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml up --build
+
+  docker:down:
+    desc: Stop all containers
+    cmds:
+      - docker compose --env-file ./.env -f deploy/docker-compose.yml down

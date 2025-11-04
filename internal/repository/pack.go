@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	sqlite3 "modernc.org/sqlite/lib"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 var (
@@ -56,7 +56,7 @@ func (r *PackRepository) AddSize(ctx context.Context, size int64) (*PackSize, er
 	var ps PackSize
 	err := r.db.QueryRowContext(ctx, `
 		INSERT INTO pack_sizes (size)
-		VALUES (?)
+		VALUES ($1)
 		RETURNING id, size
 	`, size).Scan(&ps.ID, &ps.Size)
 	if err != nil {
@@ -73,7 +73,7 @@ func (r *PackRepository) AddSize(ctx context.Context, size int64) (*PackSize, er
 func (r *PackRepository) DeleteSize(ctx context.Context, id int64) error {
 	result, err := r.db.ExecContext(ctx, `
 		DELETE FROM pack_sizes
-		WHERE id = ?
+		WHERE id = $1
 	`, id)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (r *PackRepository) EnsureSizeExists(ctx context.Context, id int64) error {
 	if err := r.db.QueryRowContext(ctx, `
 		SELECT COUNT(1) > 0
 		FROM pack_sizes
-		WHERE id = ?
+		WHERE id = $1
 	`, id).Scan(&exists); err != nil {
 		return err
 	}
@@ -121,12 +121,9 @@ func (r *PackRepository) EnsureSizeExists(ctx context.Context, id int64) error {
 }
 
 func isConstraintError(err error) bool {
-	var sqliteErr interface {
-		error
-		Code() int
-	}
-	if errors.As(err, &sqliteErr) {
-		return sqliteErr.Code() == sqlite3.SQLITE_CONSTRAINT
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
 	}
 	return false
 }

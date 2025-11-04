@@ -12,3 +12,4 @@ tmp/
 # Env
 .env
 .env.*
+!.env.example
